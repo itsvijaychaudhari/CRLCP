@@ -10,33 +10,30 @@ namespace CRLCP.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class ValidationController : ControllerBase
+    public class ValidationImageTextController : ControllerBase
     {
+
         private readonly CLRCP_MASTERContext _masterContext;
-        private readonly TEXTContext _TEXTcontext;
-        private readonly TextToSpeechContext _texttoSpeechContext;
         private readonly VALIDATION_INFOContext _validationInfoContext;
         private readonly JsonResponse _jsonResponse;
+        private readonly ImageToTextContext imageToTextContext;
+        private readonly IMAGEContext iMAGEContext;
 
-        public ValidationController(CLRCP_MASTERContext context,
-                                TEXTContext TEXTContext,
-                                TextToSpeechContext textToSpeech,
+        public ValidationImageTextController(CLRCP_MASTERContext context,
                                 VALIDATION_INFOContext ValidationInfoContext,
-                                JsonResponse jsonResponse)
+                                JsonResponse jsonResponse,
+                                ImageToTextContext imageToTextContext,
+                                IMAGEContext iMAGEContext)
         {
             _masterContext = context;
-            _TEXTcontext = TEXTContext;
-            _texttoSpeechContext = textToSpeech;
             _validationInfoContext = ValidationInfoContext;
             _jsonResponse = jsonResponse;
+            this.imageToTextContext = imageToTextContext;
+            this.iMAGEContext = iMAGEContext;
         }
-
         [HttpGet]
         [ActionName("GetValidationData")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesDefaultResponseType]
-        public IActionResult GetValidationData_TextSpeech(int DatasetId, int UserId, int LanguageId, int DomainId)
+        public IActionResult GetValidationData_ImageText(int DatasetId, int UserId, int LanguageId, int DomainId)
         {
             if (DatasetId != 0 && UserId != 0 && LanguageId != 0 && DomainId != 0)
             {
@@ -52,40 +49,29 @@ namespace CRLCP.Controllers
                     SubCategories sourcetableName = _masterContext.SubCategories.Find(datasetSubcategoryMapping.SourceSubcategoryId);
                     SubCategories destTableName = _masterContext.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
 
-                    if (destTableName.Name == "TextSpeech")
+                    if (destTableName.Name == "ImageText")
                     {
                         if (max_collection_user != null && max_collection_user != 0)
                         {
-                            List<long> allText = _validationInfoContext.TextspeechValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
-                            List<long> selectedText = _texttoSpeechContext.TextSpeech.Where(x => x.UserId != UserId && x.IsValid == null
-                                               && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId)
+                            List<long> UsersvalidatedText = _validationInfoContext.ImagetextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
+                            List<long> selectedText = imageToTextContext.ImageText.Where(x => x.UserId != UserId && x.IsValid == null
+                                               && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == LanguageId && x.DomainId == DomainId)
                                               .Select(e => e.AutoId).ToList();
 
-                            long id = selectedText.Except(allText).FirstOrDefault();
+                            long id = selectedText.Except(UsersvalidatedText).FirstOrDefault();
 
-                            var lst = selectedText.Except(allText);
+                            var lst = selectedText.Except(UsersvalidatedText);
 
-                            ValidationTextSpeechModel validationTextSpeechModel = _texttoSpeechContext.TextSpeech.Where(x=>x.AutoId == id)
-                                               .Select(e => new ValidationTextSpeechModel
+                            ValidationImageTextModel validationImageTextModel = imageToTextContext.ImageText.Where(x => x.AutoId == id)
+                                               .Select(e => new ValidationImageTextModel
                                                {
                                                    DestAutoId = e.AutoId,
                                                    SourceDataId = e.DataId,
                                                    DestinationData = e.OutputData
                                                }).FirstOrDefault();
-                            validationTextSpeechModel.SourceData = _TEXTcontext.Text.Where(x => x.DataId == validationTextSpeechModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
-                            validationTextSpeechModel.DatasetID = DatasetId;
-
-                            /*ValidationTextSpeechModel validationTextSpeechModel = textToSpeech.TextSpeech.Where(x => x.UserId != UserId && x.IsValid == null
-                                               && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId )
-                                               .Select(e => new ValidationTextSpeechModel
-                                               {
-                                                   DestAutoId = e.AutoId,
-                                                   SourceDataId = e.DataId,
-                                                   DestinationData = e.OutputData
-                                               }).FirstOrDefault();
-                            validationTextSpeechModel.SourceData = _TEXTcontext.Text.Where(x => x.DataId == validationTextSpeechModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
-                            validationTextSpeechModel.DatasetID = DatasetId;*/
-                            return Ok(validationTextSpeechModel);
+                            validationImageTextModel.SourceData =Convert.ToBase64String( iMAGEContext.Images.Where(x => x.DataId == validationImageTextModel.SourceDataId).Select(e => e.Image).FirstOrDefault());
+                            validationImageTextModel.DatasetID = DatasetId;
+                            return Ok(validationImageTextModel);
                         }
                         return NotFound();
 
@@ -101,7 +87,7 @@ namespace CRLCP.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult SetValidationData_TextSpeech(int UserId,int DestAutoId , int DatasetId,int IsMatch,int NoCrossTalk, int IsClear)
+        public IActionResult SetValidationData_ImageText(int UserId, int DestAutoId, int DatasetId, int IsMatch)
         {
             DatasetSubcategoryMappingValidation datasetSubcategoryMappingValidation = _masterContext.DatasetSubcategoryMappingValidation
                                                            .Where(x => x.DatasetId == DatasetId)
@@ -110,24 +96,25 @@ namespace CRLCP.Controllers
             {
                 SubCategories destTableNameValidation = _masterContext.SubCategories.Find(datasetSubcategoryMappingValidation.DestinationSubcategoryId);
 
-                if (destTableNameValidation.Name == "TEXTSPEECH_VALIDATION_RESPONSE_DETAIL")
+                if (destTableNameValidation.Name == "IMAGETEXT_VALIDATION_RESPONSE_DETAIL")
                 {
                     int IsValidFlag = 0;
                     if (IsMatch == 1 /*&& NoCrossTalk == 1 && IsClear == 1*/)
                     {
                         IsValidFlag = 1;
                     }
-                    _validationInfoContext.TextspeechValidationResponseDetail.Add(new TextspeechValidationResponseDetail
+                    _validationInfoContext.ImagetextValidationResponseDetail.Add(new ImagetextValidationResponseDetail
                     {
                         UserId = UserId,
                         RefAutoid = DestAutoId,
                         IsMatch = IsMatch,
-                        NoCrossTalk = NoCrossTalk,
-                        IsClear = IsClear,
+                       
+                        //NoCrossTalk = NoCrossTalk,
+                        //IsClear = IsClear,
                         ValidationFlag = IsValidFlag
                     });
 
-                    
+
 
                     ///set count
                     DatasetSubcategoryMapping datasetSubcategoryMapping = _masterContext.DatasetSubcategoryMapping
@@ -138,35 +125,35 @@ namespace CRLCP.Controllers
                     {
                         SubCategories destTableName = _masterContext.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
 
-                        if (destTableName.Name == "TextSpeech")
+                        if (destTableName.Name == "ImageText")
                         {
-                            TextSpeech textSpeech = _texttoSpeechContext.TextSpeech.Where(x => x.AutoId == DestAutoId).Select(x => x).SingleOrDefault();
-                            if (textSpeech != null)
+                            ImageText imageText = imageToTextContext.ImageText.Where(x => x.AutoId == DestAutoId).Select(x => x).SingleOrDefault();
+                            if (imageText != null)
                             {
-                                textSpeech.TotalValidationUsersCount += 1;
+                                imageText.TotalValidationUsersCount += 1;
                                 if (IsMatch == 1 /*&& NoCrossTalk == 1 && IsClear == 1*/)
                                 {
-                                    textSpeech.VoteCount += 1;
-                                    
+                                    imageText.VoteCount += 1;
+
                                 }
                                 int? maxValidationUsers = _masterContext.Datasets.Where(x => x.DatasetId == DatasetId)
                                                            .Select(x => x.MaxValidationUsers)
                                                            .FirstOrDefault();
                                 if (maxValidationUsers != null)
                                 {
-                                    if (maxValidationUsers * 0.5 < textSpeech.VoteCount)
+                                    if (maxValidationUsers * 0.5 < imageText.VoteCount)
                                     {
-                                        textSpeech.IsValid = 1;
+                                        imageText.IsValid = 1;
                                     }
-                                    else if (maxValidationUsers * 0.5 < (textSpeech.TotalValidationUsersCount - textSpeech.VoteCount))
+                                    else if (maxValidationUsers * 0.5 < (imageText.TotalValidationUsersCount - imageText.VoteCount))
                                     {
-                                        textSpeech.IsValid = 0;
+                                        imageText.IsValid = 0;
                                     }
 
                                     try
                                     {
                                         _validationInfoContext.SaveChangesAsync();
-                                        _texttoSpeechContext.SaveChangesAsync();
+                                        imageToTextContext.SaveChangesAsync();
                                     }
                                     catch (Exception)
                                     {
@@ -186,5 +173,6 @@ namespace CRLCP.Controllers
             _jsonResponse.Response = "Details not match";
             return NotFound(_jsonResponse);
         }
+
     }
 }

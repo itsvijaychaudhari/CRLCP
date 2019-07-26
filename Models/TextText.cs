@@ -7,7 +7,7 @@ namespace CRLCP.Models
     {
         public long AutoId { get; set; }
         public int UserId { get; set; }
-        public int DataId { get; set; }
+        public long DataId { get; set; }
         public int LangId { get; set; }
         public int DomainId { get; set; }
         public string OutputData { get; set; }

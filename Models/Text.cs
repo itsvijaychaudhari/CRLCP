@@ -5,7 +5,7 @@ namespace CRLCP.Models
 {
     public partial class Text
     {
-        public int DataId { get; set; }
+        public long DataId { get; set; }
         public string Text1 { get; set; }
         public int SourceId { get; set; }
         public DateTime AddedOn { get; set; }

@@ -20,14 +20,17 @@ namespace CRLCP.Controllers
         private CLRCP_MASTERContext _context;
         private TEXTContext _textContext;
         private JsonResponse jsonResponse;
+        private readonly IMAGEContext _imagesContext;
 
         public MasterController(CLRCP_MASTERContext context,
                                 TEXTContext textContext,
-                                JsonResponse jsonResponse)
+                                JsonResponse jsonResponse,
+                                IMAGEContext iMAGEContext)
         {
             _context = context;
             _textContext = textContext;
             this.jsonResponse = jsonResponse;
+            this._imagesContext = iMAGEContext;
         }
 
         [HttpGet]
@@ -862,14 +865,21 @@ namespace CRLCP.Controllers
             try
             {
                 List<DatasetSubcategoryMapping> lstdatasetSubCatMap = _context.DatasetSubcategoryMapping.ToList();
-                int destinationDb_ = lstdatasetSubCatMap.Where(e => e.DatasetId == DatasetId).Select(e => e.SourceSubcategoryId).FirstOrDefault();
-                string DestinationDBName = _context.SubCategories.Where(e => e.SubcategoryId == destinationDb_).Select(e => e.Name).FirstOrDefault();
-                if (DestinationDBName == "Text")
+                int sourceTableId = lstdatasetSubCatMap.Where(e => e.DatasetId == DatasetId).Select(e => e.SourceSubcategoryId).FirstOrDefault();
+                string SourceDBName = _context.SubCategories.Where(e => e.SubcategoryId == sourceTableId).Select(e => e.Name).FirstOrDefault();
+                if (SourceDBName == "Text")
                 {
                     var _list = new HashSet<int>(_textContext.Text.Select(e => e.DomainId));
                     List<DomainIdMapping> _domainIdMapping = _context.DomainIdMapping.ToList();
                     List<DomainIdMapping> _domainIdMappingoutput = _domainIdMapping.Where(e => _list.Contains(e.DomainId)).ToList();
-                    return  Ok(_domainIdMappingoutput);
+                    return Ok(_domainIdMappingoutput);
+                }
+                else if (SourceDBName == "Images")
+                {
+                    var _list = new HashSet<int>(_imagesContext.Images.Select(e => e.DomainId));
+                    List<DomainIdMapping> _domainIdMapping = _context.DomainIdMapping.ToList();
+                    List<DomainIdMapping> _domainIdMappingoutput = _domainIdMapping.Where(e => _list.Contains(e.DomainId)).ToList();
+                    return Ok(_domainIdMappingoutput);
                 }
             }
             catch (Exception)

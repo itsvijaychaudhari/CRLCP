@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 
 namespace CRLCP.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class DashboardController : ControllerBase

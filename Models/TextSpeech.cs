@@ -9,7 +9,7 @@ namespace CRLCP.Models
         public int UserId { get; set; }
         public int Age { get; set; }
         public string Gender { get; set; }
-        public int DataId { get; set; }
+        public long DataId { get; set; }
         public int LangId { get; set; }
         public int DomainId { get; set; }
         public byte[] OutputData { get; set; }

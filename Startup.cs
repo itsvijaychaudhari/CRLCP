@@ -117,7 +117,7 @@ namespace CRLCP
             app.UseSwaggerUI(c =>
             {
 
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CLRCP Web API");
+                c.SwaggerEndpoint("http://10.208.10.142/clrcp/swagger/v1/swagger.json", "CLRCP Web API");
             });
             app.UseAuthentication();
             app.UseMvc();
