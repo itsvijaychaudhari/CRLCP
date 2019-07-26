@@ -101,7 +101,7 @@ namespace CRLCP.Controllers
                 }
                 return GeneralHomePageDataList;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
                 //return BadRequest(new { message = ex.Message });
@@ -180,7 +180,7 @@ namespace CRLCP.Controllers
                 //return GeneralHomePageDataList;
             //return null;
           
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
                 //return BadRequest(new { message = ex.Message });

@@ -150,7 +150,7 @@ namespace CRLCP.Controllers
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return BadRequest(_jsonResponse.Response = "Unable to Update Profile");
             }

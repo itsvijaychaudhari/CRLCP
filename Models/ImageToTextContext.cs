@@ -28,7 +28,7 @@ namespace CRLCP.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
+            modelBuilder.HasAnnotation("ProductVersion", "2.2.0-rtm-35687");
 
             modelBuilder.Entity<ImageText>(entity =>
             {
@@ -46,6 +46,8 @@ namespace CRLCP.Models
 
                 entity.Property(e => e.DomainId).HasColumnName("DOMAIN_ID");
 
+                entity.Property(e => e.IsAddedInDataset).HasColumnName("IS_ADDED_IN_DATASET");
+
                 entity.Property(e => e.IsValid).HasColumnName("IS_VALID");
 
                 entity.Property(e => e.OutputData)
@@ -54,7 +56,11 @@ namespace CRLCP.Models
 
                 entity.Property(e => e.OutputLangId).HasColumnName("OUTPUT_LANG_ID");
 
+                entity.Property(e => e.TotalValidationUsersCount).HasColumnName("TOTAL_VALIDATION_USERS_COUNT");
+
                 entity.Property(e => e.UserId).HasColumnName("USER_ID");
+
+                entity.Property(e => e.VoteCount).HasColumnName("VOTE_COUNT");
             });
         }
     }

@@ -76,7 +76,7 @@ namespace CRLCP.Controllers
 
                     }
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     jsonResponse.IsSuccessful = false;
                     jsonResponse.Response = "Internal Exception";
@@ -213,7 +213,7 @@ namespace CRLCP.Controllers
                     imageToTextContext.SaveChanges();
                     return Ok(true);
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     return BadRequest(false);
                 }

@@ -39,7 +39,7 @@ namespace CRLCP.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
+            modelBuilder.HasAnnotation("ProductVersion", "2.2.0-rtm-35687");
 
             modelBuilder.Entity<Categories>(entity =>
             {
@@ -129,7 +129,7 @@ namespace CRLCP.Models
 
                 entity.Property(e => e.DomainId).HasColumnName("DOMAIN_ID");
 
-                entity.Property(e => e.Name)
+                entity.Property(e => e.Value)
                     .IsRequired()
                     .HasColumnName("VALUE")
                     .HasMaxLength(100);

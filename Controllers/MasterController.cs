@@ -84,7 +84,7 @@ namespace CRLCP.Controllers
             List<SelectListItem> _domainIdsListItems = _domainIds.Select(e => new SelectListItem
             {
                 Value = e.DomainId.ToString(),
-                Text = e.Name
+                Text = e.Value
             }).ToList();
             //_DataSetListItems.Sort(Function(a, b) a.Text < b.Text)
             return _domainIdsListItems;
@@ -125,7 +125,7 @@ namespace CRLCP.Controllers
                 }
                 _textContext.SaveChanges();
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 success = false;
             }
@@ -145,7 +145,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -160,7 +160,7 @@ namespace CRLCP.Controllers
                 List<Datasets> _datasetList = _context.Datasets.ToList();
                 return _datasetList;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -176,7 +176,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -198,7 +198,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -222,7 +222,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -235,7 +235,7 @@ namespace CRLCP.Controllers
                 List<DatasetSubcategoryMapping> _datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.ToList();
                 return _datasetSubcategoryMapping;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -251,7 +251,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -275,7 +275,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -296,7 +296,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -309,7 +309,7 @@ namespace CRLCP.Controllers
                 List<Categories> _catagories = _context.Categories.ToList();
                 return _catagories;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -325,7 +325,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -344,7 +344,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -364,7 +364,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -377,7 +377,7 @@ namespace CRLCP.Controllers
                 List<DatasetSubcategoryMappingValidation> _datasetSubcategoryMappingValidation = _context.DatasetSubcategoryMappingValidation.ToList();
                 return _datasetSubcategoryMappingValidation;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -393,7 +393,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -412,7 +412,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -428,12 +428,12 @@ namespace CRLCP.Controllers
                 var domainIdMapping = _context.DomainIdMapping.Where(e => e.DomainId == _domainIdMapping.DomainId).FirstOrDefault();
 
 
-                domainIdMapping.Name = _domainIdMapping.Name;
+                domainIdMapping.Value = _domainIdMapping.Value;
 
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -446,7 +446,7 @@ namespace CRLCP.Controllers
                 List<DomainIdMapping> _domainIdMapping = _context.DomainIdMapping.ToList();
                 return _domainIdMapping;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -462,7 +462,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -474,14 +474,14 @@ namespace CRLCP.Controllers
             {
                 DomainIdMapping domainIdMapping = new DomainIdMapping
                 {
-                    Name = _domainIdMapping.Name,
+                    Value = _domainIdMapping.Value,
 
                 };
                 _context.DomainIdMapping.Add(domainIdMapping);
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -503,7 +503,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -516,7 +516,7 @@ namespace CRLCP.Controllers
                 List<LanguageIdMapping> _languageIdMapping = _context.LanguageIdMapping.ToList();
                 return _languageIdMapping;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }
@@ -532,7 +532,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -552,7 +552,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -571,7 +571,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -600,7 +600,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -620,7 +620,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }
@@ -638,7 +638,7 @@ namespace CRLCP.Controllers
                 _context.SaveChanges();
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return BadRequest(false);
             }

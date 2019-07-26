@@ -15,7 +15,9 @@ namespace CRLCP.Models
         {
         }
 
+        public virtual DbSet<ImagetextValidationResponseDetail> ImagetextValidationResponseDetail { get; set; }
         public virtual DbSet<TextspeechValidationResponseDetail> TextspeechValidationResponseDetail { get; set; }
+        public virtual DbSet<TexttextValidationResponseDetail> TexttextValidationResponseDetail { get; set; }
 
 //        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 //        {
@@ -28,7 +30,26 @@ namespace CRLCP.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
+            modelBuilder.HasAnnotation("ProductVersion", "2.2.0-rtm-35687");
+
+            modelBuilder.Entity<ImagetextValidationResponseDetail>(entity =>
+            {
+                entity.HasKey(e => e.AutoId);
+
+                entity.ToTable("IMAGETEXT_VALIDATION_RESPONSE_DETAIL");
+
+                entity.Property(e => e.AutoId).HasColumnName("AUTO_ID");
+
+                entity.Property(e => e.IsMatch).HasColumnName("IS_MATCH");
+
+                entity.Property(e => e.RefAutoid).HasColumnName("REF_AUTOID");
+
+                entity.Property(e => e.RefSourceAutoid).HasColumnName("REF_SOURCE_AUTOID");
+
+                entity.Property(e => e.UserId).HasColumnName("USER_ID");
+
+                entity.Property(e => e.ValidationFlag).HasColumnName("VALIDATION_FLAG");
+            });
 
             modelBuilder.Entity<TextspeechValidationResponseDetail>(entity =>
             {
@@ -46,6 +67,27 @@ namespace CRLCP.Models
                 entity.Property(e => e.NoCrossTalk).HasColumnName("NO_CROSS_TALK");
 
                 entity.Property(e => e.RefAutoid).HasColumnName("REF_AUTOID");
+
+                entity.Property(e => e.RefSourceAutoid).HasColumnName("REF_SOURCE_AUTOID");
+
+                entity.Property(e => e.UserId).HasColumnName("USER_ID");
+
+                entity.Property(e => e.ValidationFlag).HasColumnName("VALIDATION_FLAG");
+            });
+
+            modelBuilder.Entity<TexttextValidationResponseDetail>(entity =>
+            {
+                entity.HasKey(e => e.AutoId);
+
+                entity.ToTable("TEXTTEXT_VALIDATION_RESPONSE_DETAIL");
+
+                entity.Property(e => e.AutoId).HasColumnName("AUTO_ID");
+
+                entity.Property(e => e.IsMatch).HasColumnName("IS_MATCH");
+
+                entity.Property(e => e.RefAutoid).HasColumnName("REF_AUTOID");
+
+                entity.Property(e => e.RefSourceAutoid).HasColumnName("REF_SOURCE_AUTOID");
 
                 entity.Property(e => e.UserId).HasColumnName("USER_ID");
 

@@ -19,7 +19,7 @@ namespace CRLCP.Models.DBO
         public int  AddDomainIDs(string _domainValue)
         {
             DomainIdMapping _domainIdMapping = new DomainIdMapping();
-            _domainIdMapping.Name = _domainValue;
+            _domainIdMapping.Value = _domainValue;
             bool success = false;
             int _domainId=0;
             try
@@ -27,7 +27,7 @@ namespace CRLCP.Models.DBO
                 _context.Add<DomainIdMapping>(_domainIdMapping);
                 //_context.DomainIdMapping.Add(_domainIdMapping);
                 _context.SaveChanges();
-                 _domainId = Convert.ToInt32( _context.DomainIdMapping.Where(e => e.Name == _domainValue).Select(e=>e.DomainId).FirstOrDefault());
+                 _domainId = Convert.ToInt32( _context.DomainIdMapping.Where(e => e.Value == _domainValue).Select(e=>e.DomainId).FirstOrDefault());
                 success = true;
             }
             catch(Exception ex)
