@@ -53,30 +53,34 @@ namespace CRLCP.Controllers
                     {
                         if (max_collection_user != null && max_collection_user != 0)
                         {
-                            List<long> UsersvalidatedText = _validationInfoContext.ImagetextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
-                            List<long> selectedText = imageToTextContext.ImageText.Where(x => x.UserId != UserId && x.IsValid == null
-                                               && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == LanguageId && x.DomainId == DomainId)
-                                              .Select(e => e.AutoId).ToList();
+                            try
+                            {
+                                List<long> UsersvalidatedText = _validationInfoContext.ImagetextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
+                                List<long> selectedText = imageToTextContext.ImageText.Where(x => x.UserId != UserId && x.IsValid == null
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == LanguageId && x.DomainId == DomainId)
+                                                  .Select(e => e.AutoId).ToList();
 
-                            long id = selectedText.Except(UsersvalidatedText).FirstOrDefault();
+                                long id = selectedText.Except(UsersvalidatedText).FirstOrDefault();
 
-                            var lst = selectedText.Except(UsersvalidatedText);
+                                var lst = selectedText.Except(UsersvalidatedText);
 
-                            ValidationImageTextModel validationImageTextModel = imageToTextContext.ImageText.Where(x => x.AutoId == id)
-                                               .Select(e => new ValidationImageTextModel
-                                               {
-                                                   DestAutoId = e.AutoId,
-                                                   SourceDataId = e.DataId,
-                                                   DestinationData = e.OutputData
-                                               }).FirstOrDefault();
-                            validationImageTextModel.SourceData =Convert.ToBase64String( iMAGEContext.Images.Where(x => x.DataId == validationImageTextModel.SourceDataId).Select(e => e.Image).FirstOrDefault());
-                            validationImageTextModel.DatasetID = DatasetId;
-                            return Ok(validationImageTextModel);
+                                ValidationImageTextModel validationImageTextModel = imageToTextContext.ImageText.Where(x => x.AutoId == id)
+                                                   .Select(e => new ValidationImageTextModel
+                                                   {
+                                                       DestAutoId = e.AutoId,
+                                                       SourceDataId = e.DataId,
+                                                       DestinationData = e.OutputData
+                                                   }).FirstOrDefault();
+                                validationImageTextModel.SourceData = Convert.ToBase64String(iMAGEContext.Images.Where(x => x.DataId == validationImageTextModel.SourceDataId).Select(e => e.Image).FirstOrDefault());
+                                validationImageTextModel.DatasetID = DatasetId;
+                                return Ok(validationImageTextModel);
+                            }
+                            catch (Exception)
+                            {
+                                return Ok(new ValidationImageTextModel());
+                            }
                         }
-                        return NotFound();
-
                     }
-                    return NotFound();
                 }
             }
             return BadRequest();

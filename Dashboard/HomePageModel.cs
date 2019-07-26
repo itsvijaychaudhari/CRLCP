@@ -12,5 +12,7 @@ namespace CRLCP.Models.Dashboard
         public int SourceDataCount { get; set; }
 
         public int CollectedDataCount { get; set; }
+
+        public int ValidatedDataCount { get; set; }
     }
 }

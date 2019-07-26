@@ -47,57 +47,78 @@ namespace CRLCP.Controllers
         [ProducesDefaultResponseType]
         public IActionResult GetText(int DatasetId, int UserId, int langId, int DomainId)
         {
-            
-            //int langId = _context.UserInfo.FirstOrDefault(x => x.UserId == UserId).LangId1;
-
-            DatasetSubcategoryMapping datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Where(x => x.DatasetId == DatasetId).SingleOrDefault();
-            if (datasetSubcategoryMapping != null)
+            try
             {
-                SubCategories sourcetableName = _context.SubCategories.Find(datasetSubcategoryMapping.SourceSubcategoryId);
-                SubCategories destTableName = _context.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
-
-                if (sourcetableName.Name == "Text")
+                Random rnd = new Random();
+                DatasetSubcategoryMapping datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Where(x => x.DatasetId == DatasetId).SingleOrDefault();
+                if (datasetSubcategoryMapping != null)
                 {
-                    //List<int> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId== langId).Select(user => user.DataId).ToList();
-                    if (destTableName.Name == "TextSpeech")
+                    SubCategories sourcetableName = _context.SubCategories.Find(datasetSubcategoryMapping.SourceSubcategoryId);
+                    SubCategories destTableName = _context.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
+
+                    if (sourcetableName.Name == "Text")
                     {
-                        List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
-                        List<long> UserData = TextToSpeech.TextSpeech.Where(user => user.UserId == UserId).Select(user => user.DataId ).Distinct().ToList();
-                        List<long> linq = sentences.Except(UserData).ToList();
-                        if (linq.Count > 0)
+                        //List<int> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId== langId).Select(user => user.DataId).ToList();
+                        if (destTableName.Name == "TextSpeech")
                         {
-                            return Ok(new
+                            List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
+                            List<long> UserData = TextToSpeech.TextSpeech.Where(user => user.UserId == UserId).Select(user => user.DataId).Distinct().ToList();
+                            List<long> linq = sentences.Except(UserData).ToList();
+
+                            if (linq.Count > 0)
                             {
-                                Text = _TEXTContext.Text.Find(linq.FirstOrDefault()).Text1,
-                                DataId = linq.First()
-                            });
+                                int r = rnd.Next(linq.Count);
+                                return Ok(new
+                                {
+                                    Text = _TEXTContext.Text.Find(linq[r]).Text1,
+                                    DataId = linq[r]
+                                });
+                            }
                         }
-                    }
-                    else if (destTableName.Name == "TextText")
-                    {
-                       //langId = 24;//TODO
-                        List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId ).Select(user => user.DataId).ToList();
-                        List<long> textText = textContext.TextText.Where(x => x.DatasetId == DatasetId).Select(user => user.DataId).ToList();
-                        List<long> linq = sentences.Except(textText).ToList();
-                        if (linq.Count > 0)
+                        else if (destTableName.Name == "TextText")
                         {
-                            return Ok(new
+                            //langId = 24;//TODO
+                            List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId).Select(user => user.DataId).ToList();
+                            List<long> textText = textContext.TextText.Where(x => x.DatasetId == DatasetId && x.LangId == langId).Select(user => user.DataId).ToList();
+                            List<long> linq = sentences.Except(textText).ToList();
+                            if (linq.Count > 0)
                             {
-                                Text = _TEXTContext.Text.Find(linq.FirstOrDefault()).Text1,
-                                DataId = linq.First()
-                            });
+                                int r = rnd.Next(linq.Count);
+                                return Ok(new
+                                {
+                                    //Text = _TEXTContext.Text.Find(linq.FirstOrDefault()).Text1,
+                                    Text = _TEXTContext.Text.Find(linq[r]).Text1,
+                                    DataId = linq[r]
+                                });
+                            }
                         }
                     }
                 }
             }
-            return NotFound();
+            catch (Exception)
+            {
+
+                return Ok(new
+                {
+                    Text = string.Empty,
+                    DataId = 0
+                });
+            }
+            //int langId = _context.UserInfo.FirstOrDefault(x => x.UserId == UserId).LangId1;
+
+            return Ok(new
+            {
+                Text = string.Empty,
+                DataId = 0
+            });
+
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(JsonResponse), StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Uploadfile(int UserId,int DataId,int DatasetId,IFormFile file)
+        public async Task<IActionResult> Uploadfile(int UserId,int DataId,int DatasetId,int LangId, int DomainId, IFormFile file)
         {
             DatasetSubcategoryMapping datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Find(DatasetId);
             SubCategories destTableName = _context.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
@@ -109,18 +130,18 @@ namespace CRLCP.Controllers
                     using (var stream = new MemoryStream())
                     {
                         await file.CopyToAsync(stream);
-                        TextSpeech textSpeech = new TextSpeech()
-                        {
-                            UserId = UserId,
-                            Age = _context.UserInfo.Find(UserId).Age,
-                            Gender = _context.UserInfo.Find(UserId).Gender,
-                            DataId = DataId,
-                            LangId = _TEXTContext.Text.Find(DataId).LangId,
-                            DomainId = _TEXTContext.Text.Find(DataId).DomainId,
-                            OutputData = stream.ToArray(),
-                            DatasetId = DatasetId,
-                            AddedOn = DateTime.Now,
-                        };
+                        TextSpeech textSpeech = new TextSpeech();
+                        textSpeech.UserId = UserId;
+                        textSpeech.Age = _context.UserInfo.Find(UserId).Age;
+                        textSpeech.Gender = _context.UserInfo.Find(UserId).Gender;
+                        textSpeech.DataId = DataId;
+                        textSpeech.LangId = LangId;
+                        textSpeech.DomainId = DomainId;
+                        textSpeech.OutputData = stream.ToArray();
+                        textSpeech.DatasetId = DatasetId;
+                        textSpeech.AddedOn = DateTime.Now;
+                        textSpeech.TotalValidationUsersCount = 0;
+                        
                         TextToSpeech.TextSpeech.Add(textSpeech);
                         TextToSpeech.SaveChanges();
                         jsonResponse.IsSuccessful = true;
@@ -149,57 +170,78 @@ namespace CRLCP.Controllers
         {
 
             //int langId = _context.UserInfo.FirstOrDefault(x => x.UserId == UserId).LangId1;
-
-            DatasetSubcategoryMapping datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Where(x => x.DatasetId == DatasetId).SingleOrDefault();
-            if (datasetSubcategoryMapping != null)
+            try
             {
-                SubCategories sourcetableName = _context.SubCategories.Find(datasetSubcategoryMapping.SourceSubcategoryId);
-                SubCategories destTableName = _context.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
-
-                if (sourcetableName.Name == "Images")
+                Random rnd = new Random();
+                DatasetSubcategoryMapping datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Where(x => x.DatasetId == DatasetId).SingleOrDefault();
+                if (datasetSubcategoryMapping != null)
                 {
-                    //List<int> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId== langId).Select(user => user.DataId).ToList();
-                    if (destTableName.Name == "ImageText")
+                    SubCategories sourcetableName = _context.SubCategories.Find(datasetSubcategoryMapping.SourceSubcategoryId);
+                    SubCategories destTableName = _context.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
+
+                    if (sourcetableName.Name == "Images")
                     {
-                        List<long> Images = null;
-                        if (langId == 0)
+                        //List<int> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId== langId).Select(user => user.DataId).ToList();
+                        if (destTableName.Name == "ImageText")
                         {
-                            Images = iMAGEContext.Images.Where(x => x.DatasetId == DatasetId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
-                        }
-                        else
-                        {
-                            Images = iMAGEContext.Images.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
-                        }
-                        List<long> UserData = imageToTextContext.ImageText.Where(x => x.DatasetId == DatasetId && x.UserId == UserId).Select(user => user.DataId).Distinct().ToList();
-                        List<long> linq = Images.Except(UserData).ToList();
-                                               
-                        if (linq.Count > 0)
-                        {
-                            return Ok(new
+                            List<long> Images = null;
+                            if (langId == 0)
                             {
-                                ImageString = iMAGEContext.Images.Find(linq.FirstOrDefault()).Image,
-                                DataId = linq.First() 
-                            });
-                        }
-                    }
-                    else if (destTableName.Name == "TextText")
-                    {
-                        //langId = 24;//TODO
-                        List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
-                        List<long> textText = textContext.TextText.Where(x => x.DatasetId == DatasetId && x.UserId == UserId).Select(user => user.DataId).ToList();
-                        List<long> linq = sentences.Except(textText).ToList();
-                        if (linq.Count > 0)
-                        {
-                            return Ok(new
+                                Images = iMAGEContext.Images.Where(x => x.DatasetId == DatasetId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
+                            }
+                            else
                             {
-                                Text = _TEXTContext.Text.Find(linq.FirstOrDefault()).Text1,
-                                DataId = linq.First()
-                            });
+                                Images = iMAGEContext.Images.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
+                            }
+                            List<long> UserData = imageToTextContext.ImageText.Where(x => x.DatasetId == DatasetId && x.UserId == UserId).Select(user => user.DataId).Distinct().ToList();
+                            List<long> linq = Images.Except(UserData).ToList();
+
+                            if (linq.Count > 0)
+                            {
+                                int r = rnd.Next(linq.Count);
+                                return Ok(new
+                                {
+                                    //ImageString = iMAGEContext.Images.Find(linq.FirstOrDefault()).Image,
+                                    ImageString = iMAGEContext.Images.Find(linq[r]).Image,
+                                    DataId = linq[r]
+                                });
+                            }
+                        }
+                        else if (destTableName.Name == "TextText")
+                        {
+                            //langId = 24;//TODO
+                            List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
+                            List<long> textText = textContext.TextText.Where(x => x.DatasetId == DatasetId && x.UserId == UserId).Select(user => user.DataId).ToList();
+                            List<long> linq = sentences.Except(textText).ToList();
+                            if (linq.Count > 0)
+                            {
+                                int r = rnd.Next(linq.Count);
+                                return Ok(new
+                                {
+                                    //Text = _TEXTContext.Text.Find(linq.FirstOrDefault()).Text1,
+                                    Text = _TEXTContext.Text.Find(linq[r]).Text1,
+                                    DataId = linq[r]
+                                });
+                            }
                         }
                     }
                 }
             }
-            return NotFound();
+            catch (Exception)
+            {
+
+                return Ok(new
+                {
+                    ImageString = string.Empty,
+                    DataId = 0
+                });
+            }
+
+            return Ok(new
+            {
+                ImageString = string.Empty,
+                DataId = 0
+            });
         }
 
 
@@ -262,7 +304,8 @@ namespace CRLCP.Controllers
                         OutputData = Text,
                         OutputLangId = OutputLangId,//_context.UserInfo.SingleOrDefault(x => x.UserId == UserId).LangId1,
                         DatasetId = DatasetId,
-                        AddedOn = DateTime.Now
+                        AddedOn = DateTime.Now,
+                        TotalValidationUsersCount =0
                     };
                     imageToTextContext.ImageText.Add(imageText);
                     imageToTextContext.SaveChanges();
@@ -290,7 +333,8 @@ namespace CRLCP.Controllers
                         OutputData = Text,
                         OutputLangId = OutputLangId,//_context.UserInfo.SingleOrDefault(x => x.UserId == UserId).LangId1,
                         DatasetId = DatasetId,
-                        AddedOn = DateTime.Now
+                        AddedOn = DateTime.Now,
+                        TotalValidationUsersCount=0
                     };
                     textContext.TextText.Add(textText);
                     textContext.SaveChanges();

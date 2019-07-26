@@ -56,41 +56,37 @@ namespace CRLCP.Controllers
                     {
                         if (max_collection_user != null && max_collection_user != 0)
                         {
-                            List<long> allText = _validationInfoContext.TextspeechValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
-                            List<long> selectedText = _texttoSpeechContext.TextSpeech.Where(x => x.UserId != UserId && x.IsValid == null
-                                               && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId)
-                                              .Select(e => e.AutoId).ToList();
+                            try
+                            {
+                                List<long> allText = _validationInfoContext.TextspeechValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
+                                List<long> selectedText = _texttoSpeechContext.TextSpeech.Where(x => x.UserId != UserId && x.IsValid == null
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId)
+                                                  .Select(e => e.AutoId).ToList();
 
-                            long id = selectedText.Except(allText).FirstOrDefault();
+                                long id = selectedText.Except(allText).FirstOrDefault();
 
-                            var lst = selectedText.Except(allText);
+                                var lst = selectedText.Except(allText);
 
-                            ValidationTextSpeechModel validationTextSpeechModel = _texttoSpeechContext.TextSpeech.Where(x=>x.AutoId == id)
-                                               .Select(e => new ValidationTextSpeechModel
-                                               {
-                                                   DestAutoId = e.AutoId,
-                                                   SourceDataId = e.DataId,
-                                                   DestinationData = e.OutputData
-                                               }).FirstOrDefault();
-                            validationTextSpeechModel.SourceData = _TEXTcontext.Text.Where(x => x.DataId == validationTextSpeechModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
-                            validationTextSpeechModel.DatasetID = DatasetId;
+                                ValidationTextSpeechModel validationTextSpeechModel = _texttoSpeechContext.TextSpeech.Where(x => x.AutoId == id)
+                                                   .Select(e => new ValidationTextSpeechModel
+                                                   {
+                                                       DestAutoId = e.AutoId,
+                                                       SourceDataId = e.DataId,
+                                                       DestinationData = e.OutputData
+                                                   }).FirstOrDefault();
+                                validationTextSpeechModel.SourceData = _TEXTcontext.Text.Where(x => x.DataId == validationTextSpeechModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
+                                validationTextSpeechModel.DatasetID = DatasetId;
 
-                            /*ValidationTextSpeechModel validationTextSpeechModel = textToSpeech.TextSpeech.Where(x => x.UserId != UserId && x.IsValid == null
-                                               && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId )
-                                               .Select(e => new ValidationTextSpeechModel
-                                               {
-                                                   DestAutoId = e.AutoId,
-                                                   SourceDataId = e.DataId,
-                                                   DestinationData = e.OutputData
-                                               }).FirstOrDefault();
-                            validationTextSpeechModel.SourceData = _TEXTcontext.Text.Where(x => x.DataId == validationTextSpeechModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
-                            validationTextSpeechModel.DatasetID = DatasetId;*/
-                            return Ok(validationTextSpeechModel);
+
+                                return Ok(validationTextSpeechModel);
+                            }
+                            catch (Exception)
+                            {
+
+                                return Ok(new ValidationTextSpeechModel()); 
+                            }
                         }
-                        return NotFound();
-
                     }
-                    return NotFound();
                 }
             }
             return BadRequest();

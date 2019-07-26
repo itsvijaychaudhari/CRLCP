@@ -163,7 +163,21 @@ namespace CRLCP.Controllers
         [ProducesDefaultResponseType]
         public IActionResult GetProfile(int UserId)
         {
-            return Ok(_masterContext.UserInfo.FirstOrDefault(x => x.UserId == UserId));
+            try
+            {
+                UserInfo userInfo = _masterContext.UserInfo.FirstOrDefault(x => x.UserId == UserId);
+                return Ok(userInfo);
+            }
+            catch (Exception)
+            {
+
+                _jsonResponse.IsSuccessful = false;
+                _jsonResponse.Response = "User not found";
+                return Ok(_jsonResponse);
+
+
+            }
+            
         }
 
 

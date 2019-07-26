@@ -27,13 +27,15 @@ namespace CRLCP.Controllers
         private IMAGEContext _imageContext;
         private ImageToTextContext _imageToTextContext;
         private TextToTextContext _textToTextContext;
+        private readonly VALIDATION_INFOContext vALIDATION_INFOContext;
 
         public DashboardController(CLRCP_MASTERContext context,
                                    TEXTContext textContext, 
                                    TextToSpeechContext textToSpeechContext,
                                    IMAGEContext imageContext, 
                                    ImageToTextContext imageToTextContext,
-                                   TextToTextContext textToTextContext, 
+                                   TextToTextContext textToTextContext,
+                                   VALIDATION_INFOContext vALIDATION_INFOContext,
                                    IOptions<AppSettings> appSettings)
         {
             _context = context;
@@ -42,6 +44,7 @@ namespace CRLCP.Controllers
             _imageContext = imageContext;
             _imageToTextContext = imageToTextContext;
             _textToTextContext = textToTextContext;
+            this.vALIDATION_INFOContext = vALIDATION_INFOContext;
         }
 
         
@@ -57,6 +60,7 @@ namespace CRLCP.Controllers
                 model = _context.DatasetSubcategoryMapping.ToList();
                 int sourceDbCount = 0;
                 int destinationDbCount = 0;
+                int valDestinationDbCount = 0;
                 //foreach to fetch overall source and destination counts per dataset
                 //for eg: ASR     source count:2  destination count: 15
                 foreach (var item in model)
@@ -65,6 +69,8 @@ namespace CRLCP.Controllers
                     HomePageModel homePageCount = new HomePageModel();
                     destinationDbCount = 0;
                     sourceDbCount = 0;
+                    valDestinationDbCount = 0;
+
                     string DatasetName = Convert.ToString(_context.Datasets.Where(e => e.DatasetId == item.DatasetId).Select(e => e.Name).FirstOrDefault()) ?? "";
 
                     string SourceDB = Convert.ToString(_context.SubCategories.Where(e => e.SubcategoryId == item.SourceSubcategoryId).Select(e => e.Name).FirstOrDefault()) ?? "";
@@ -77,11 +83,16 @@ namespace CRLCP.Controllers
                         if (DestinationDB == "TextSpeech")
                         {
                             destinationDbCount = _textToSpeechContext.TextSpeech.Where(e => e.DatasetId == item.DatasetId).Count();
+                            List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(e => e.DatasetId == item.DatasetId).Select(x=>x.AutoId).ToList();
+                            valDestinationDbCount= vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(e => textSpeeches.Contains(e.RefAutoid)).Count();
+                            
                         }
-
                         else if (DestinationDB == "TextText")
                         {
                             destinationDbCount = _textToTextContext.TextText.Where(e => e.DatasetId == item.DatasetId).Count();
+                            List<long> textTextes = _textToTextContext.TextText.Where(e => e.DatasetId == item.DatasetId).Select(x => x.AutoId).ToList();
+                            valDestinationDbCount += vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(e => textTextes.Contains(e.RefAutoid)).Count();
+
                         }
                     }
 
@@ -91,12 +102,17 @@ namespace CRLCP.Controllers
                         if (DestinationDB == "ImageText")
                         {
                             destinationDbCount = _imageToTextContext.ImageText.Where(e => e.DatasetId == item.DatasetId).Count();
+                            List<long> imageTextes = _imageToTextContext.ImageText.Where(e => e.DatasetId == item.DatasetId).Select(x => x.AutoId).ToList();
+                            valDestinationDbCount = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(e => imageTextes.Contains(e.RefAutoid)).Count();
                         }
 
                     }
+
+
                     homePageCount.DataSetName = DatasetName;
                     homePageCount.SourceDataCount = sourceDbCount;
                     homePageCount.CollectedDataCount = destinationDbCount;
+                    homePageCount.ValidatedDataCount = valDestinationDbCount;
                     GeneralHomePageDataList.Add(homePageCount);
                 }
                 return GeneralHomePageDataList;
@@ -193,7 +209,6 @@ namespace CRLCP.Controllers
         [HttpGet]
         public IEnumerable<DashboardModel> GetUserWorkReport(int UserId)
         {
-
             //store result in user list
             List<DashboardModel> userWiseDataCount = new List<DashboardModel>();
             //get all dataset and find at destination folder using userid filter
@@ -208,29 +223,36 @@ namespace CRLCP.Controllers
             {
                 int srcDbId = Convert.ToInt32(destinationList.Where(e => e.DatasetId == dataset.DatasetId).Select(e => e.SourceSubcategoryId).SingleOrDefault());
                 int destinationDbId = Convert.ToInt32(destinationList.Where(e => e.DatasetId == dataset.DatasetId).Select(e => e.DestinationSubcategoryId).SingleOrDefault());
-                
+                int ValdestinationCount = 0;
                 string srcDbname = Convert.ToString(_context.SubCategories.Where(e => e.SubcategoryId == srcDbId).Select(e => e.Name).SingleOrDefault());
                 string DestinationDBName = Convert.ToString(_context.SubCategories.Where(e => e.SubcategoryId == destinationDbId).Select(e => e.Name).SingleOrDefault());
 
                 if (srcDbname == "Text")
                 {
                     int sourceDatasetCount = _textContext.Text.Where(e => e.DatasetId == dataset.DatasetId).Count();
+                    
                     if (DestinationDBName == "TextSpeech")
                     {
+                        List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
                         userWiseDataCount.Add(new DashboardModel
                         {
                             DatasetName = dataset.Name,
                             SrcDatasetCount = sourceDatasetCount,
                             DestDatasetCount = _textToSpeechContext.TextSpeech.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e).Count(),
+                            ValDatasetCount = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(x => textSpeeches.Contains(x.RefAutoid)).Count()
                         });
+
+
                     }
                     else if (DestinationDBName == "TextText")
                     {
+                        List<long> textTextes = _textToTextContext.TextText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
                         userWiseDataCount.Add(new DashboardModel
                         {
                             DatasetName = dataset.Name,
                             SrcDatasetCount = sourceDatasetCount,
                             DestDatasetCount = _textToTextContext.TextText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e).Count(),
+                            ValDatasetCount = vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(x => textTextes.Contains(x.RefAutoid)).Count()
                         });
                     }
                 }
@@ -240,11 +262,13 @@ namespace CRLCP.Controllers
                     int sourceDatasetCount = _imageContext.Images.Where(e => e.DatasetId == dataset.DatasetId).Count();
                     if (DestinationDBName == "ImageText")
                     {
+                        List<long> ImageText = _imageToTextContext.ImageText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
                         userWiseDataCount.Add(new DashboardModel
                         {
                             DatasetName = dataset.Name,
                             SrcDatasetCount = sourceDatasetCount,
                             DestDatasetCount = _imageToTextContext.ImageText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e).Count(),
+                            ValDatasetCount = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(x=> ImageText.Contains(x.RefAutoid)).Count()
                         });
                     }
 

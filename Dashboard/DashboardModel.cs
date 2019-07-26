@@ -10,5 +10,6 @@ namespace CRLCP.Dashboard
         public string DatasetName { get; set; }
         public int SrcDatasetCount { get; set; }
         public int DestDatasetCount { get; set; }
+        public int ValDatasetCount { get; set; }
     }
 }

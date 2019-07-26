@@ -56,25 +56,33 @@ namespace CRLCP.Controllers
                     {
                         if (max_collection_user != null && max_collection_user != 0)
                         {
-                            //Get all sentences id which is already validate by user from Validation Info Database 
-                            List<long> UsersvalidatedText = _validationInfoContext.TexttextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
-                            //get all sentences which is not contributed by current user and other filters
-                            List<long> SentencesToProcess = _textToTextContext.TextText.Where(x => x.UserId != UserId && x.IsValid == null
-                                               && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == DestLangId && x.DomainId == DomainId)
-                                              .Select(e => e.AutoId).ToList();
-                            //substract already validate sentences from remaining sentences {get id of first sentence}
-                            long id = SentencesToProcess.Except(UsersvalidatedText).FirstOrDefault();
+                            try
+                            {
+                                //Get all sentences id which is already validate by user from Validation Info Database 
+                                List<long> UsersvalidatedText = _validationInfoContext.TexttextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
+                                //get all sentences which is not contributed by current user and other filters
+                                List<long> SentencesToProcess = _textToTextContext.TextText.Where(x => x.UserId != UserId && x.IsValid == null
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == DestLangId && x.DomainId == DomainId)
+                                                  .Select(e => e.AutoId).ToList();
+                                //substract already validate sentences from remaining sentences {get id of first sentence}
+                                long id = SentencesToProcess.Except(UsersvalidatedText).FirstOrDefault();
 
-                            ValidationTextToTextModel validationTexToTextModel = _textToTextContext.TextText.Where(x => x.AutoId == id)
-                                               .Select(e => new ValidationTextToTextModel
-                                               {
-                                                   DestAutoId = e.AutoId,
-                                                   SourceDataId = e.DataId,
-                                                   DestinationData = e.OutputData
-                                               }).FirstOrDefault();
-                            validationTexToTextModel.SourceData = _textContext.Text.Where(x => x.DataId == validationTexToTextModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
-                            validationTexToTextModel.DatasetID = DatasetId;
-                            return Ok(validationTexToTextModel);
+                                ValidationTextToTextModel validationTexToTextModel = _textToTextContext.TextText.Where(x => x.AutoId == id)
+                                                   .Select(e => new ValidationTextToTextModel
+                                                   {
+                                                       DestAutoId = e.AutoId,
+                                                       SourceDataId = e.DataId,
+                                                       DestinationData = e.OutputData
+                                                   }).FirstOrDefault();
+                                validationTexToTextModel.SourceData = _textContext.Text.Where(x => x.DataId == validationTexToTextModel.SourceDataId).Select(e => e.Text1).FirstOrDefault();
+                                validationTexToTextModel.DatasetID = DatasetId;
+                                return Ok(validationTexToTextModel);
+                            }
+                            catch (Exception)
+                            {
+
+                                return Ok(new ValidationTextToTextModel());
+                            }
                         }
                         return NotFound();
 
@@ -106,17 +114,13 @@ namespace CRLCP.Controllers
                     {
                         IsValidFlag = 1;
                     }
-                    _validationInfoContext.ImagetextValidationResponseDetail.Add(new ImagetextValidationResponseDetail
+                    _validationInfoContext.TexttextValidationResponseDetail.Add(new TexttextValidationResponseDetail
                     {
                         UserId = UserId,
                         RefAutoid = DestAutoId,
                         IsMatch = IsMatch,
-
-                        //NoCrossTalk = NoCrossTalk,
-                        //IsClear = IsClear,
                         ValidationFlag = IsValidFlag
                     });
-
 
 
                     ///set count
@@ -128,7 +132,7 @@ namespace CRLCP.Controllers
                     {
                         SubCategories destTableName = _MasterContext.SubCategories.Find(datasetSubcategoryMapping.DestinationSubcategoryId);
 
-                        if (destTableName.Name == "ImageText")
+                        if (destTableName.Name == "TextText")
                         {
                             TextText imageText = _textToTextContext.TextText.Where(x => x.AutoId == DestAutoId).Select(x => x).SingleOrDefault();
                             if (imageText != null)
