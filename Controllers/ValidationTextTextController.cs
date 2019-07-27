@@ -140,7 +140,15 @@ namespace CRLCP.Controllers
                                 imageText.TotalValidationUsersCount += 1;
                                 if (IsMatch == 1 /*&& NoCrossTalk == 1 && IsClear == 1*/)
                                 {
-                                    imageText.VoteCount += 1;
+                                    //imageText.VoteCount += 1;
+                                    if (imageText.VoteCount == null)
+                                    {
+                                        imageText.VoteCount = 1;
+                                    }
+                                    else
+                                    {
+                                        imageText.VoteCount += 1;
+                                    }
 
                                 }
                                 int? maxValidationUsers = _MasterContext.Datasets.Where(x => x.DatasetId == DatasetId)
