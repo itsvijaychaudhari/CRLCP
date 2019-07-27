@@ -62,7 +62,7 @@ namespace CRLCP.Controllers
                                 List<long> UsersvalidatedText = _validationInfoContext.TexttextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
                                 //get all sentences which is not contributed by current user and other filters
                                 List<long> SentencesToProcess = _textToTextContext.TextText.Where(x => x.UserId != UserId && x.IsValid == null
-                                                   && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == DestLangId && x.DomainId == DomainId)
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.LangId== SourceLangId && x.OutputLangId == DestLangId && x.DomainId == DomainId)
                                                   .Select(e => e.AutoId).ToList();
                                 //substract already validate sentences from remaining sentences {get id of first sentence}
                                 long id = SentencesToProcess.Except(UsersvalidatedText).FirstOrDefault();
@@ -98,7 +98,7 @@ namespace CRLCP.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult SetValidationData_ImageText(int UserId, int DestAutoId, int DatasetId, int IsMatch)
+        public IActionResult SetValidationData_TextText(int UserId, int DestAutoId, int DatasetId, int IsMatch)
         {
             DatasetSubcategoryMappingValidation datasetSubcategoryMappingValidation = _MasterContext.DatasetSubcategoryMappingValidation
                                                            .Where(x => x.DatasetId == DatasetId)

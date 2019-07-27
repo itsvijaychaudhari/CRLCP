@@ -57,7 +57,7 @@ namespace CRLCP.Controllers
                             {
                                 List<long> UsersvalidatedText = _validationInfoContext.ImagetextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
                                 List<long> selectedText = imageToTextContext.ImageText.Where(x => x.UserId != UserId && x.IsValid == null
-                                                   && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == LanguageId && x.DomainId == DomainId)
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == LanguageId && x.DomainId == DomainId && x.DatasetId == DatasetId)
                                                   .Select(e => e.AutoId).ToList();
 
                                 long id = selectedText.Except(UsersvalidatedText).FirstOrDefault();

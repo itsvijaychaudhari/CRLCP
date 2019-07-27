@@ -83,16 +83,22 @@ namespace CRLCP.Controllers
                         if (DestinationDB == "TextSpeech")
                         {
                             destinationDbCount = _textToSpeechContext.TextSpeech.Where(e => e.DatasetId == item.DatasetId).Count();
-                            List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(e => e.DatasetId == item.DatasetId).Select(x=>x.AutoId).ToList();
-                            valDestinationDbCount= vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(e => textSpeeches.Contains(e.RefAutoid)).Count();
-                            
+                            //List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(e => e.DatasetId == item.DatasetId).Select(x=>x.AutoId).ToList();
+                            //valDestinationDbCount= vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(e => textSpeeches.Contains(e.RefAutoid)).Count();
+                            List<long> UserValData = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Select(X => X.RefAutoid).ToList();
+                            List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(x => x.DatasetId == item.DatasetId).Select(e => e.AutoId).ToList();
+                            valDestinationDbCount = UserValData.Intersect(textSpeeches).Count();
+
+
                         }
                         else if (DestinationDB == "TextText")
                         {
                             destinationDbCount = _textToTextContext.TextText.Where(e => e.DatasetId == item.DatasetId).Count();
-                            List<long> textTextes = _textToTextContext.TextText.Where(e => e.DatasetId == item.DatasetId).Select(x => x.AutoId).ToList();
-                            valDestinationDbCount += vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(e => textTextes.Contains(e.RefAutoid)).Count();
-
+                            //List<long> textTextes = _textToTextContext.TextText.Where(e => e.DatasetId == item.DatasetId).Select(x => x.AutoId).ToList();
+                            //valDestinationDbCount += vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(e => textTextes.Contains(e.RefAutoid)).Count();
+                            List<long> UserValData = vALIDATION_INFOContext.TexttextValidationResponseDetail.Select(X => X.RefAutoid).ToList();
+                            List<long> texttexts = _textToTextContext.TextText.Where(x => x.DatasetId == item.DatasetId).Select(e => e.AutoId).ToList();
+                            valDestinationDbCount = UserValData.Intersect(texttexts).Count();
                         }
                     }
 
@@ -102,8 +108,11 @@ namespace CRLCP.Controllers
                         if (DestinationDB == "ImageText")
                         {
                             destinationDbCount = _imageToTextContext.ImageText.Where(e => e.DatasetId == item.DatasetId).Count();
-                            List<long> imageTextes = _imageToTextContext.ImageText.Where(e => e.DatasetId == item.DatasetId).Select(x => x.AutoId).ToList();
-                            valDestinationDbCount = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(e => imageTextes.Contains(e.RefAutoid)).Count();
+                            //List<long> imageTextes = _imageToTextContext.ImageText.Where(e => e.DatasetId == item.DatasetId).Select(x => x.AutoId).ToList();
+                            //valDestinationDbCount = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(e => imageTextes.Contains(e.RefAutoid)).Count();
+                            List<long> UserValData = vALIDATION_INFOContext.TexttextValidationResponseDetail.Select(X => X.RefAutoid).ToList();
+                            List<long> texttexts = _textToTextContext.TextText.Where(x => x.DatasetId == item.DatasetId).Select(e => e.AutoId).ToList();
+                            valDestinationDbCount = UserValData.Intersect(texttexts).Count();
                         }
 
                     }
@@ -223,7 +232,7 @@ namespace CRLCP.Controllers
             {
                 int srcDbId = Convert.ToInt32(destinationList.Where(e => e.DatasetId == dataset.DatasetId).Select(e => e.SourceSubcategoryId).SingleOrDefault());
                 int destinationDbId = Convert.ToInt32(destinationList.Where(e => e.DatasetId == dataset.DatasetId).Select(e => e.DestinationSubcategoryId).SingleOrDefault());
-                int ValdestinationCount = 0;
+                //int ValdestinationCount = 0;
                 string srcDbname = Convert.ToString(_context.SubCategories.Where(e => e.SubcategoryId == srcDbId).Select(e => e.Name).SingleOrDefault());
                 string DestinationDBName = Convert.ToString(_context.SubCategories.Where(e => e.SubcategoryId == destinationDbId).Select(e => e.Name).SingleOrDefault());
 
@@ -233,26 +242,36 @@ namespace CRLCP.Controllers
                     
                     if (DestinationDBName == "TextSpeech")
                     {
-                        List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
+                        
+                        List<long> UserValData = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(x => x.UserId == UserId).Select(X => X.RefAutoid).ToList();
+                        List<long> textSpeeches = _textToSpeechContext.TextSpeech.Where(x => x.DatasetId == dataset.DatasetId ).Select(e => e.AutoId).ToList();
+                        List<long> actualUserValidatedForDataset = UserValData.Intersect(textSpeeches).ToList();
+
                         userWiseDataCount.Add(new DashboardModel
                         {
                             DatasetName = dataset.Name,
                             SrcDatasetCount = sourceDatasetCount,
                             DestDatasetCount = _textToSpeechContext.TextSpeech.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e).Count(),
-                            ValDatasetCount = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(x => textSpeeches.Contains(x.RefAutoid)).Count()
+                            //ValDatasetCount = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(x => textSpeeches.Contains(x.RefAutoid)).Count()
+                            ValDatasetCount = actualUserValidatedForDataset.Count()
                         });
-
-
+                        //var a = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Where(x => textSpeeches.Contains(x.RefAutoid));
+                        //var abc = vALIDATION_INFOContext.TextspeechValidationResponseDetail.Select(x=>x.RefAutoid).Intersect(textSpeeches);
                     }
                     else if (DestinationDBName == "TextText")
                     {
-                        List<long> textTextes = _textToTextContext.TextText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
+                        //List<long> textTextes = _textToTextContext.TextText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
+                        List<long> UserValData = vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(x => x.UserId == UserId).Select(X => X.RefAutoid).ToList();
+                        List<long> texttexts = _textToTextContext.TextText.Where(x => x.DatasetId == dataset.DatasetId).Select(e => e.AutoId).ToList();
+                        List<long> actualUserValidatedForDataset = UserValData.Intersect(texttexts).ToList();
+
                         userWiseDataCount.Add(new DashboardModel
                         {
                             DatasetName = dataset.Name,
                             SrcDatasetCount = sourceDatasetCount,
                             DestDatasetCount = _textToTextContext.TextText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e).Count(),
-                            ValDatasetCount = vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(x => textTextes.Contains(x.RefAutoid)).Count()
+                            //ValDatasetCount = vALIDATION_INFOContext.TexttextValidationResponseDetail.Where(x => textTextes.Contains(x.RefAutoid)).Count()
+                            ValDatasetCount = actualUserValidatedForDataset.Count()
                         });
                     }
                 }
@@ -262,13 +281,18 @@ namespace CRLCP.Controllers
                     int sourceDatasetCount = _imageContext.Images.Where(e => e.DatasetId == dataset.DatasetId).Count();
                     if (DestinationDBName == "ImageText")
                     {
-                        List<long> ImageText = _imageToTextContext.ImageText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
+                        //List<long> ImageText = _imageToTextContext.ImageText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e.AutoId).ToList();
+                        List<long> UserValData = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(x => x.UserId == UserId).Select(X => X.RefAutoid).ToList();
+                        List<long> imagetexts = _imageToTextContext.ImageText.Where(x => x.DatasetId == dataset.DatasetId).Select(e => e.AutoId).ToList();
+                        List<long> actualUserValidatedForDataset = UserValData.Intersect(imagetexts).ToList();
+
                         userWiseDataCount.Add(new DashboardModel
                         {
                             DatasetName = dataset.Name,
                             SrcDatasetCount = sourceDatasetCount,
                             DestDatasetCount = _imageToTextContext.ImageText.Where(x => x.DatasetId == dataset.DatasetId && x.UserId == UserId).Select(e => e).Count(),
-                            ValDatasetCount = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(x=> ImageText.Contains(x.RefAutoid)).Count()
+                            //ValDatasetCount = vALIDATION_INFOContext.ImagetextValidationResponseDetail.Where(x=> ImageText.Contains(x.RefAutoid)).Count()
+                            ValDatasetCount = actualUserValidatedForDataset.Count()
                         });
                     }
 
