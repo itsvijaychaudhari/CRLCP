@@ -62,7 +62,7 @@ namespace CRLCP.Controllers
                         if (destTableName.Name == "TextSpeech")
                         {
                             List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
-                            List<long> UserData = TextToSpeech.TextSpeech.Where(user => user.UserId == UserId).Select(user => user.DataId).Distinct().ToList();
+                            List<long> UserData = TextToSpeech.TextSpeech.Where(user => user.DatasetId == DatasetId && user.UserId == UserId).Select(user => user.DataId).Distinct().ToList();
                             List<long> linq = sentences.Except(UserData).ToList();
 
                             if (linq.Count > 0)
@@ -78,8 +78,8 @@ namespace CRLCP.Controllers
                         else if (destTableName.Name == "TextText")
                         {
                             //langId = 24;//TODO
-                            List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId).Select(user => user.DataId).ToList();
-                            List<long> textText = textContext.TextText.Where(x => x.DatasetId == DatasetId && x.LangId == langId).Select(user => user.DataId).ToList();
+                            List<long> sentences = _TEXTContext.Text.Where(x => x.DatasetId == DatasetId && x.LangId == langId && x.DomainId == DomainId).Select(user => user.DataId).ToList();
+                            List<long> textText = textContext.TextText.Where(user => user.DatasetId == DatasetId && user.UserId == UserId).Select(user => user.DataId).ToList();
                             List<long> linq = sentences.Except(textText).ToList();
                             if (linq.Count > 0)
                             {
