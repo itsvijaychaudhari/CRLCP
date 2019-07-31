@@ -35,6 +35,7 @@ namespace CRLCP.Controllers
         [ActionName("GetValidationData")]
         public IActionResult GetValidationData_TextText(int DatasetId, int UserId, int SourceLangId, int DestLangId, int DomainId)
         {
+            Random rnd = new Random();
             if (DatasetId != 0 && UserId != 0 && SourceLangId != 0  && DomainId != 0)
             {
                 //get max user which process the validation for current dataset
@@ -62,10 +63,19 @@ namespace CRLCP.Controllers
                                 List<long> UsersvalidatedText = _validationInfoContext.TexttextValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
                                 //get all sentences which is not contributed by current user and other filters
                                 List<long> SentencesToProcess = _textToTextContext.TextText.Where(x => x.UserId != UserId && x.IsValid == null
-                                                   && x.TotalValidationUsersCount < max_collection_user && x.LangId== SourceLangId && x.OutputLangId == DestLangId && x.DomainId == DomainId)
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.LangId== SourceLangId && x.OutputLangId == DestLangId && x.DomainId == DomainId && x.DatasetId == DatasetId)
                                                   .Select(e => e.AutoId).ToList();
                                 //substract already validate sentences from remaining sentences {get id of first sentence}
-                                long id = SentencesToProcess.Except(UsersvalidatedText).FirstOrDefault();
+
+                                //long id = SentencesToProcess.Except(UsersvalidatedText).FirstOrDefault();
+                                List<long> linq = SentencesToProcess.Except(UsersvalidatedText).ToList();
+
+                                long id = -1;
+                                if (linq.Count > 0)
+                                {
+                                    int r = rnd.Next(linq.Count);
+                                    id = linq[r];
+                                }
 
                                 ValidationTextToTextModel validationTexToTextModel = _textToTextContext.TextText.Where(x => x.AutoId == id)
                                                    .Select(e => new ValidationTextToTextModel

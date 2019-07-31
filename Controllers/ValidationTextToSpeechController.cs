@@ -38,6 +38,7 @@ namespace CRLCP.Controllers
         [ProducesDefaultResponseType]
         public IActionResult GetValidationData_TextSpeech(int DatasetId, int UserId, int LanguageId, int DomainId)
         {
+            Random rnd = new Random();
             if (DatasetId != 0 && UserId != 0 && LanguageId != 0 && DomainId != 0)
             {
                 int? max_collection_user = _masterContext.Datasets.Where(x => x.DatasetId == DatasetId)
@@ -60,10 +61,18 @@ namespace CRLCP.Controllers
                             {
                                 List<long> allText = _validationInfoContext.TextspeechValidationResponseDetail.Where(x => x.UserId == UserId).Select(e => e.RefAutoid).ToList();
                                 List<long> selectedText = _texttoSpeechContext.TextSpeech.Where(x => x.UserId != UserId && x.IsValid == null
-                                                   && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId)
+                                                   && x.TotalValidationUsersCount < max_collection_user && x.LangId == LanguageId && x.DomainId == DomainId && x.DatasetId == DatasetId)
                                                   .Select(e => e.AutoId).ToList();
 
-                                long id = selectedText.Except(allText).FirstOrDefault();
+                                //long id = selectedText.Except(allText).FirstOrDefault();
+
+                                List<long> linq = selectedText.Except(allText).ToList();
+                                long id = -1;
+                                if (linq.Count > 0)
+                                {
+                                    int r = rnd.Next(linq.Count);
+                                    id = linq[r];
+                                }
 
                                 var lst = selectedText.Except(allText);
 

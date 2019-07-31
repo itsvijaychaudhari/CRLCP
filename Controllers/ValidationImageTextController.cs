@@ -35,6 +35,7 @@ namespace CRLCP.Controllers
         [ActionName("GetValidationData")]
         public IActionResult GetValidationData_ImageText(int DatasetId, int UserId, int LanguageId, int DomainId)
         {
+            Random rnd = new Random();
             if (DatasetId != 0 && UserId != 0 && LanguageId != 0 && DomainId != 0)
             {
                 int? max_collection_user = _masterContext.Datasets.Where(x => x.DatasetId == DatasetId)
@@ -60,7 +61,16 @@ namespace CRLCP.Controllers
                                                    && x.TotalValidationUsersCount < max_collection_user && x.OutputLangId == LanguageId && x.DomainId == DomainId && x.DatasetId == DatasetId)
                                                   .Select(e => e.AutoId).ToList();
 
-                                long id = selectedText.Except(UsersvalidatedText).FirstOrDefault();
+                                //long id = selectedText.Except(UsersvalidatedText).FirstOrDefault();
+
+                                List<long> linq = selectedText.Except(UsersvalidatedText).ToList();                         
+
+                                long id = -1;
+                                if (linq.Count > 0)
+                                {
+                                    int r = rnd.Next(linq.Count);
+                                    id = linq[r];
+                                }
 
                                 var lst = selectedText.Except(UsersvalidatedText);
 
