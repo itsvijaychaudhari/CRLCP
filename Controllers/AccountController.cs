@@ -17,7 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CRLCP.Controllers
 {
-   
+    [Authorize]
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -75,7 +75,6 @@ namespace CRLCP.Controllers
         [AllowAnonymous]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        
         [ProducesDefaultResponseType]
         public IActionResult Login([FromBody] LoginModel login)
         {

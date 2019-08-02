@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CRLCP.Helper;
 using CRLCP.Models;
 using CRLCP.Services;
+using CRLCP.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace CRLCP
 {
@@ -31,14 +33,27 @@ namespace CRLCP
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
-
             services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            //services.ConfigureSwaggerGen(options =>
+            //{
+            //    options.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
+            //});
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "CLRCP Web API", Version = "v1" });
+                c.AddSecurityDefinition("Bearer",
+                    new ApiKeyScheme
+                    {
+                        Name = "Authorization",
+                        In = "header",
+                        Description = "Please enter word \"Bearer\" followed by space and JXT token",
+                        Type = "apiKey"
+                    });
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    { "Bearer", Enumerable.Empty<string>()}
+                });
             });
             services.AddDbContext<CLRCP_MASTERContext>(options => options.UseSqlServer(Configuration.GetConnectionString("CLRCP_MASTERConectionString")));
             services.AddDbContext<TEXTContext>(options => options.UseSqlServer(Configuration.GetConnectionString("TextConnectionString")));
@@ -50,6 +65,7 @@ namespace CRLCP
 
             services.AddScoped<IUserRepository, UserService>();
             services.AddTransient<JsonResponse, JsonResponse>();
+            services.AddScoped<IDashboardHelper, DashboardHelper>();
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
