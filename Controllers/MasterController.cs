@@ -17,34 +17,34 @@ namespace CRLCP.Controllers
     [ApiController]
     public class MasterController : ControllerBase
     {
-        private CLRCP_MASTERContext _context;
-        private TEXTContext _textContext;
+        private readonly CLRCP_MASTERContext _CLRCP_MASTERContext;
+        private readonly TEXTContext _TEXTContext;
         private JsonResponse jsonResponse;
-        private readonly IMAGEContext _imagesContext;
+        private readonly IMAGEContext _IMAGEContext;
 
         public MasterController(CLRCP_MASTERContext context,
                                 TEXTContext textContext,
-                                JsonResponse jsonResponse,
+                                JsonResponse JsonResponse,
                                 IMAGEContext iMAGEContext)
         {
-            _context = context;
-            _textContext = textContext;
-            this.jsonResponse = jsonResponse;
-            this._imagesContext = iMAGEContext;
+            _CLRCP_MASTERContext = context;
+            _TEXTContext = textContext;
+            jsonResponse = JsonResponse;
+            _IMAGEContext = iMAGEContext;
         }
 
         [HttpGet]
         [ActionName("GetListDataset")]
         //API TO GET HOMEPAGE DASHBOARD COUNTS user wise (ADMIN HOMEPAGE)
-        public List<SelectListItem> GetDataSet()
+        public IEnumerable<SelectListItem> GetDataSet()
         {
             //List<SelectListItem>
-            var _datasets = _context.Datasets;
-            List<SelectListItem> _DataSetListItems = _datasets.Select(e => new SelectListItem
+            var _datasets = _CLRCP_MASTERContext.Datasets;
+            IEnumerable<SelectListItem> _DataSetListItems = _datasets.Select(e => new SelectListItem
             {
                 Value = e.DatasetId.ToString(),
                 Text = e.Description
-            }).ToList();
+            });
             //_DataSetListItems.Sort(Function(a, b) a.Text < b.Text)
             return _DataSetListItems;
         }
@@ -53,7 +53,7 @@ namespace CRLCP.Controllers
         public List<SelectListItem> GetLanguageIDs()
         {
             //List<SelectListItem>
-            var _languageIds = _context.LanguageIdMapping;
+            var _languageIds = _CLRCP_MASTERContext.LanguageIdMapping;
             List<SelectListItem> _languageIdsListItems = _languageIds.Select(e => new SelectListItem
             {
                 Value = e.LanguageId.ToString(),
@@ -69,7 +69,7 @@ namespace CRLCP.Controllers
         public List<SelectListItem> GetSourceIDs()
         {
             //List<SelectListItem>
-            var _sourceIds = _context.SourceIdMapping;
+            var _sourceIds = _CLRCP_MASTERContext.SourceIdMapping;
             List<SelectListItem> _sourceIdsListItems = _sourceIds.Select(e => new SelectListItem
             {
                 Value = e.SourceId.ToString(),
@@ -83,7 +83,7 @@ namespace CRLCP.Controllers
         public List<SelectListItem> GetDomainIDs()
         {
             //List<SelectListItem>
-            var _domainIds = _context.DomainIdMapping;
+            var _domainIds = _CLRCP_MASTERContext.DomainIdMapping;
             List<SelectListItem> _domainIdsListItems = _domainIds.Select(e => new SelectListItem
             {
                 Value = e.DomainId.ToString(),
@@ -122,11 +122,11 @@ namespace CRLCP.Controllers
                     model.SourceId = _textModel.SourceId;
                     model.Text1 = lines[i];
 
-                    _textContext.Add(model);
+                    _TEXTContext.Add(model);
 
                     success = true;
                 }
-                _textContext.SaveChanges();
+                _TEXTContext.SaveChanges();
             }
             catch (Exception )
             {
@@ -140,12 +140,12 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var datasets = _context.Datasets.Where(e => e.DatasetId == _datasets.DatasetId).FirstOrDefault();
+                var datasets = _CLRCP_MASTERContext.Datasets.Where(e => e.DatasetId == _datasets.DatasetId).FirstOrDefault();
                 datasets.Name = _datasets.Name;
                 datasets.Description = _datasets.Description;
                 datasets.MaxCollectionUsers = _datasets.MaxCollectionUsers;
                 datasets.MaxValidationUsers = _datasets.MaxValidationUsers;
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -160,7 +160,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<Datasets> _datasetList = _context.Datasets.ToList();
+                List<Datasets> _datasetList = _CLRCP_MASTERContext.Datasets.ToList();
                 return _datasetList;
             }
             catch (Exception )
@@ -173,10 +173,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var datasets = _context.Datasets.Where(e => e.DatasetId == _datasets.DatasetId).FirstOrDefault();
+                var datasets = _CLRCP_MASTERContext.Datasets.Where(e => e.DatasetId == _datasets.DatasetId).FirstOrDefault();
 
-                _context.Datasets.Remove(datasets);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.Datasets.Remove(datasets);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -197,8 +197,8 @@ namespace CRLCP.Controllers
                     MaxValidationUsers = _datasets.MaxValidationUsers,
                     IsVisible = _datasets.IsVisible
                 };
-                _context.Datasets.Add(datasets);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.Datasets.Add(datasets);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -214,7 +214,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Where(e => e.AutoId == _datasetSubcategoryMapping.AutoId).FirstOrDefault();
+                var datasetSubcategoryMapping = _CLRCP_MASTERContext.DatasetSubcategoryMapping.Where(e => e.AutoId == _datasetSubcategoryMapping.AutoId).FirstOrDefault();
                 datasetSubcategoryMapping.DatasetId = _datasetSubcategoryMapping.DatasetId;
                 datasetSubcategoryMapping.SourceSubcategoryId = _datasetSubcategoryMapping.SourceSubcategoryId;
                 datasetSubcategoryMapping.DestinationSubcategoryId = _datasetSubcategoryMapping.DestinationSubcategoryId;
@@ -222,7 +222,7 @@ namespace CRLCP.Controllers
                 datasetSubcategoryMapping.DestinationSubcategoryId2 = _datasetSubcategoryMapping.DestinationSubcategoryId2;
                 datasetSubcategoryMapping.SourceSubcategoryId3 = _datasetSubcategoryMapping.SourceSubcategoryId3;
                 datasetSubcategoryMapping.DestinationSubcategoryId3 = _datasetSubcategoryMapping.DestinationSubcategoryId3;
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -235,7 +235,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<DatasetSubcategoryMapping> _datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.ToList();
+                List<DatasetSubcategoryMapping> _datasetSubcategoryMapping = _CLRCP_MASTERContext.DatasetSubcategoryMapping.ToList();
                 return _datasetSubcategoryMapping;
             }
             catch (Exception )
@@ -248,10 +248,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var datasetSubcategoryMapping = _context.DatasetSubcategoryMapping.Where(e => e.AutoId == _datasetSubcategoryMapping.AutoId).FirstOrDefault();
+                var datasetSubcategoryMapping = _CLRCP_MASTERContext.DatasetSubcategoryMapping.Where(e => e.AutoId == _datasetSubcategoryMapping.AutoId).FirstOrDefault();
 
-                _context.DatasetSubcategoryMapping.Remove(datasetSubcategoryMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.DatasetSubcategoryMapping.Remove(datasetSubcategoryMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -274,8 +274,8 @@ namespace CRLCP.Controllers
                     SourceSubcategoryId3 = _datasetSubcategoryMapping.SourceSubcategoryId3,
                     DestinationSubcategoryId3 = _datasetSubcategoryMapping.DestinationSubcategoryId3
                 };
-                _context.DatasetSubcategoryMapping.Add(datasetSubcategoryMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.DatasetSubcategoryMapping.Add(datasetSubcategoryMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -291,12 +291,12 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var catagories = _context.Categories.Where(e => e.CategoryId == _catagories.CategoryId).FirstOrDefault();
+                var catagories = _CLRCP_MASTERContext.Categories.Where(e => e.CategoryId == _catagories.CategoryId).FirstOrDefault();
 
                 catagories.Name = _catagories.Name;
                 catagories.Description = _catagories.Description;
 
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -309,7 +309,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<Categories> _catagories = _context.Categories.ToList();
+                List<Categories> _catagories = _CLRCP_MASTERContext.Categories.ToList();
                 return _catagories;
             }
             catch (Exception )
@@ -322,10 +322,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var catagories = _context.Categories.Where(e => e.CategoryId == _catagories.CategoryId).FirstOrDefault();
+                var catagories = _CLRCP_MASTERContext.Categories.Where(e => e.CategoryId == _catagories.CategoryId).FirstOrDefault();
 
-                _context.Categories.Remove(catagories);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.Categories.Remove(catagories);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -343,8 +343,8 @@ namespace CRLCP.Controllers
                     Name = _catagories.Name,
                     Description = _catagories.Description
                 };
-                _context.Categories.Add(catagories);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.Categories.Add(catagories);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -359,12 +359,12 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var datasetSubcategoryMappingValidation = _context.DatasetSubcategoryMappingValidation.Where(e => e.AutoId == _datasetSubcategoryMappingValidation.AutoId).FirstOrDefault();
+                var datasetSubcategoryMappingValidation = _CLRCP_MASTERContext.DatasetSubcategoryMappingValidation.Where(e => e.AutoId == _datasetSubcategoryMappingValidation.AutoId).FirstOrDefault();
 
                 datasetSubcategoryMappingValidation.DatasetId = _datasetSubcategoryMappingValidation.DatasetId;
                 datasetSubcategoryMappingValidation.DestinationSubcategoryId = _datasetSubcategoryMappingValidation.DestinationSubcategoryId;
 
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -377,7 +377,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<DatasetSubcategoryMappingValidation> _datasetSubcategoryMappingValidation = _context.DatasetSubcategoryMappingValidation.ToList();
+                List<DatasetSubcategoryMappingValidation> _datasetSubcategoryMappingValidation = _CLRCP_MASTERContext.DatasetSubcategoryMappingValidation.ToList();
                 return _datasetSubcategoryMappingValidation;
             }
             catch (Exception )
@@ -390,10 +390,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var datasetSubcategoryMappingValidation = _context.DatasetSubcategoryMappingValidation.Where(e => e.AutoId == _datasetSubcategoryMappingValidation.AutoId).FirstOrDefault();
+                var datasetSubcategoryMappingValidation = _CLRCP_MASTERContext.DatasetSubcategoryMappingValidation.Where(e => e.AutoId == _datasetSubcategoryMappingValidation.AutoId).FirstOrDefault();
 
-                _context.DatasetSubcategoryMappingValidation.Remove(datasetSubcategoryMappingValidation);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.DatasetSubcategoryMappingValidation.Remove(datasetSubcategoryMappingValidation);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -411,8 +411,8 @@ namespace CRLCP.Controllers
                     DatasetId = _datasetSubcategoryMappingValidation.DatasetId,
                     DestinationSubcategoryId = _datasetSubcategoryMappingValidation.DestinationSubcategoryId
                 };
-                _context.DatasetSubcategoryMappingValidation.Add(datasetSubcategoryMappingValidation);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.DatasetSubcategoryMappingValidation.Add(datasetSubcategoryMappingValidation);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -428,12 +428,12 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var domainIdMapping = _context.DomainIdMapping.Where(e => e.DomainId == _domainIdMapping.DomainId).FirstOrDefault();
+                var domainIdMapping = _CLRCP_MASTERContext.DomainIdMapping.Where(e => e.DomainId == _domainIdMapping.DomainId).FirstOrDefault();
 
 
                 domainIdMapping.Value = _domainIdMapping.Value;
 
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -446,7 +446,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<DomainIdMapping> _domainIdMapping = _context.DomainIdMapping.ToList();
+                List<DomainIdMapping> _domainIdMapping = _CLRCP_MASTERContext.DomainIdMapping.ToList();
                 return _domainIdMapping;
             }
             catch (Exception )
@@ -459,10 +459,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var domainIdMapping = _context.DomainIdMapping.Where(e => e.DomainId == _domainIdMapping.DomainId).FirstOrDefault();
+                var domainIdMapping = _CLRCP_MASTERContext.DomainIdMapping.Where(e => e.DomainId == _domainIdMapping.DomainId).FirstOrDefault();
 
-                _context.DomainIdMapping.Remove(domainIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.DomainIdMapping.Remove(domainIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -480,8 +480,8 @@ namespace CRLCP.Controllers
                     Value = _domainIdMapping.Value,
 
                 };
-                _context.DomainIdMapping.Add(domainIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.DomainIdMapping.Add(domainIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -497,13 +497,13 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var languageIdMapping = _context.LanguageIdMapping.Where(e => e.LanguageId == _languageIdMapping.LanguageId).FirstOrDefault();
+                var languageIdMapping = _CLRCP_MASTERContext.LanguageIdMapping.Where(e => e.LanguageId == _languageIdMapping.LanguageId).FirstOrDefault();
 
 
                 languageIdMapping.Value = _languageIdMapping.Value;
                 languageIdMapping.Description = _languageIdMapping.Description;
 
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -516,7 +516,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<LanguageIdMapping> _languageIdMapping = _context.LanguageIdMapping.ToList();
+                List<LanguageIdMapping> _languageIdMapping = _CLRCP_MASTERContext.LanguageIdMapping.ToList();
                 return _languageIdMapping;
             }
             catch (Exception )
@@ -529,10 +529,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var domainIdMapping = _context.LanguageIdMapping.Where(e => e.LanguageId == _languageIdMapping.LanguageId).FirstOrDefault();
+                var domainIdMapping = _CLRCP_MASTERContext.LanguageIdMapping.Where(e => e.LanguageId == _languageIdMapping.LanguageId).FirstOrDefault();
 
-                _context.LanguageIdMapping.Remove(domainIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.LanguageIdMapping.Remove(domainIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -551,8 +551,8 @@ namespace CRLCP.Controllers
                     Description = _languageIdMapping.Description
 
                 };
-                _context.LanguageIdMapping.Add(languageIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.LanguageIdMapping.Add(languageIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -569,9 +569,9 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var qualificationIdMapping = _context.QualificationIdMapping.Where(e => e.QualificationId == _qualificationIdMapping.QualificationId).FirstOrDefault();
+                var qualificationIdMapping = _CLRCP_MASTERContext.QualificationIdMapping.Where(e => e.QualificationId == _qualificationIdMapping.QualificationId).FirstOrDefault();
                 qualificationIdMapping.Value = _qualificationIdMapping.Value;
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -584,7 +584,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<QualificationIdMapping> _qualificationIdMapping = _context.QualificationIdMapping.ToList();
+                List<QualificationIdMapping> _qualificationIdMapping = _CLRCP_MASTERContext.QualificationIdMapping.ToList();
                 return _qualificationIdMapping;
             }
             catch (Exception ex)
@@ -597,10 +597,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var qualificationIdMapping = _context.QualificationIdMapping.Where(e => e.QualificationId == _qualificationIdMapping.QualificationId).FirstOrDefault();
+                var qualificationIdMapping = _CLRCP_MASTERContext.QualificationIdMapping.Where(e => e.QualificationId == _qualificationIdMapping.QualificationId).FirstOrDefault();
 
-                _context.QualificationIdMapping.Remove(qualificationIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.QualificationIdMapping.Remove(qualificationIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -619,8 +619,8 @@ namespace CRLCP.Controllers
 
 
                 };
-                _context.QualificationIdMapping.Add(qualificationIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.QualificationIdMapping.Add(qualificationIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -636,9 +636,9 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var sourceIdMapping = _context.SourceIdMapping.Where(e => e.SourceId == _sourceIdMapping.SourceId).FirstOrDefault();
+                var sourceIdMapping = _CLRCP_MASTERContext.SourceIdMapping.Where(e => e.SourceId == _sourceIdMapping.SourceId).FirstOrDefault();
                 sourceIdMapping.Value = _sourceIdMapping.Value;
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception )
@@ -651,7 +651,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<SourceIdMapping> _sourceIdMapping = _context.SourceIdMapping.ToList();
+                List<SourceIdMapping> _sourceIdMapping = _CLRCP_MASTERContext.SourceIdMapping.ToList();
                 return _sourceIdMapping;
             }
             catch (Exception ex)
@@ -664,10 +664,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var sourceIdMapping = _context.SourceIdMapping.Where(e => e.SourceId == _sourceIdMapping.SourceId).FirstOrDefault();
+                var sourceIdMapping = _CLRCP_MASTERContext.SourceIdMapping.Where(e => e.SourceId == _sourceIdMapping.SourceId).FirstOrDefault();
 
-                _context.SourceIdMapping.Remove(sourceIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SourceIdMapping.Remove(sourceIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception ex)
@@ -686,8 +686,8 @@ namespace CRLCP.Controllers
 
 
                 };
-                _context.SourceIdMapping.Add(sourceIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SourceIdMapping.Add(sourceIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception ex)
@@ -700,11 +700,11 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var sourceIdMapping = _context.SubCategories.Where(e => e.SubcategoryId == _subCategories.SubcategoryId).FirstOrDefault();
+                var sourceIdMapping = _CLRCP_MASTERContext.SubCategories.Where(e => e.SubcategoryId == _subCategories.SubcategoryId).FirstOrDefault();
                 sourceIdMapping.CategoryId = _subCategories.CategoryId;
                 sourceIdMapping.Name = _subCategories.Name;
                 sourceIdMapping.Description = _subCategories.Description;
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception ex)
@@ -717,7 +717,7 @@ namespace CRLCP.Controllers
         {
             try
             {
-                List<SubCategories> _subCategories = _context.SubCategories.ToList();
+                List<SubCategories> _subCategories = _CLRCP_MASTERContext.SubCategories.ToList();
                 return _subCategories;
             }
             catch (Exception ex)
@@ -730,10 +730,10 @@ namespace CRLCP.Controllers
         {
             try
             {
-                var sourceIdMapping = _context.SubCategories.Where(e => e.SubcategoryId == _subCategories.SubcategoryId).FirstOrDefault();
+                var sourceIdMapping = _CLRCP_MASTERContext.SubCategories.Where(e => e.SubcategoryId == _subCategories.SubcategoryId).FirstOrDefault();
 
-                _context.SubCategories.Remove(sourceIdMapping);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SubCategories.Remove(sourceIdMapping);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception ex)
@@ -753,8 +753,8 @@ namespace CRLCP.Controllers
                     Description = _subCategories.Description
 
                 };
-                _context.SubCategories.Add(subCategories);
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SubCategories.Add(subCategories);
+                _CLRCP_MASTERContext.SaveChanges();
                 return Ok(true);
             }
             catch (Exception ex)
@@ -777,11 +777,11 @@ namespace CRLCP.Controllers
             try
             {
                 //delete record from UserLanguageMapping table 
-                List<UserLanguageMapping> userLanguage = _context.UserLanguageMapping.Where(x => x.UserId == model.UserId).ToList();
+                List<UserLanguageMapping> userLanguage = _CLRCP_MASTERContext.UserLanguageMapping.Where(x => x.UserId == model.UserId).ToList();
                 if (userLanguage.Count > 0)
                 {
-                    _context.UserLanguageMapping.RemoveRange(userLanguage);
-                    _context.SaveChanges();
+                    _CLRCP_MASTERContext.UserLanguageMapping.RemoveRange(userLanguage);
+                    _CLRCP_MASTERContext.SaveChanges();
                 }
 
                 //List<UserLanguageMapping> userLanguage =  _context.UserLanguageMapping.Where(x => x.UserId == model.UserId).ToList();
@@ -808,13 +808,13 @@ namespace CRLCP.Controllers
                 int count = model.languageId.Count();
                 for (int i = 0; i < count; i++)
                 {
-                    _context.UserLanguageMapping.Add(new UserLanguageMapping
+                    _CLRCP_MASTERContext.UserLanguageMapping.Add(new UserLanguageMapping
                     {
                         UserId = model.UserId,
                         LanguageId = model.languageId[i]
                     });
                 }
-                _context.SaveChanges();
+                _CLRCP_MASTERContext.SaveChanges();
                 jsonResponse.IsSuccessful = true;
                 jsonResponse.Response = "Data saved successfully";
                 return Ok(jsonResponse);
@@ -839,11 +839,11 @@ namespace CRLCP.Controllers
             {
                 //UsersLanguage usersLanguage = new UsersLanguage();
                // List<UserLanguageMapping> list = _context.UserLanguageMapping.Where(e => e.UserId == UserId).ToList();
-                List<int> language = _context.UserLanguageMapping.Where(e => e.UserId == UserId).Select(y=>y.LanguageId).ToList();
+                List<int> language = _CLRCP_MASTERContext.UserLanguageMapping.Where(e => e.UserId == UserId).Select(y=>y.LanguageId).ToList();
 
                // usersLanguage.UserId = UserId;
                 //usersLanguage.languageId = _context.LanguageIdMapping.Where(e => list.(x => x.LanguageId)) .ToList();
-                List<LanguageIdMapping> languageIdMappings = _context.LanguageIdMapping.Where(x => language.Contains(x.LanguageId)).ToList();
+                List<LanguageIdMapping> languageIdMappings = _CLRCP_MASTERContext.LanguageIdMapping.Where(x => language.Contains(x.LanguageId)).ToList();
 
                 return Ok(languageIdMappings);
             }
@@ -864,20 +864,20 @@ namespace CRLCP.Controllers
             jsonResponse.Response = "Internal Server Error";
             try
             {
-                List<DatasetSubcategoryMapping> lstdatasetSubCatMap = _context.DatasetSubcategoryMapping.ToList();
+                List<DatasetSubcategoryMapping> lstdatasetSubCatMap = _CLRCP_MASTERContext.DatasetSubcategoryMapping.ToList();
                 int sourceTableId = lstdatasetSubCatMap.Where(e => e.DatasetId == DatasetId).Select(e => e.SourceSubcategoryId).FirstOrDefault();
-                string SourceDBName = _context.SubCategories.Where(e => e.SubcategoryId == sourceTableId).Select(e => e.Name).FirstOrDefault();
+                string SourceDBName = _CLRCP_MASTERContext.SubCategories.Where(e => e.SubcategoryId == sourceTableId).Select(e => e.Name).FirstOrDefault();
                 if (SourceDBName == "Text")
                 {
-                    var _list = new HashSet<int>(_textContext.Text.Select(e => e.DomainId));
-                    List<DomainIdMapping> _domainIdMapping = _context.DomainIdMapping.ToList();
+                    var _list = new HashSet<int>(_TEXTContext.Text.Select(e => e.DomainId));
+                    List<DomainIdMapping> _domainIdMapping = _CLRCP_MASTERContext.DomainIdMapping.ToList();
                     List<DomainIdMapping> _domainIdMappingoutput = _domainIdMapping.Where(e => _list.Contains(e.DomainId)).ToList();
                     return Ok(_domainIdMappingoutput);
                 }
                 else if (SourceDBName == "Images")
                 {
-                    var _list = new HashSet<int>(_imagesContext.Images.Select(e => e.DomainId));
-                    List<DomainIdMapping> _domainIdMapping = _context.DomainIdMapping.ToList();
+                    var _list = new HashSet<int>(_IMAGEContext.Images.Select(e => e.DomainId));
+                    List<DomainIdMapping> _domainIdMapping = _CLRCP_MASTERContext.DomainIdMapping.ToList();
                     List<DomainIdMapping> _domainIdMappingoutput = _domainIdMapping.Where(e => _list.Contains(e.DomainId)).ToList();
                     return Ok(_domainIdMappingoutput);
                 }
